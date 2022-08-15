@@ -1,12 +1,6 @@
-import type { JsonArray } from 'type-fest';
+import { render } from './core/render.js';
+import { transformToFrames } from './core/transform.js';
 
-export async function main(path: string) {
-  const { default: data } = await import(path, { assert: { type: 'json' }});
-  const profile = data as JsonArray;
-
-  const screenshots = profile.filter(item => item['name'] === 'Screenshot');
-  console.log(screenshots);
+export function createFilmstrip(profile: ProfileEvent[]) {
+  return render(transformToFrames(profile));
 }
-
-
-main();
