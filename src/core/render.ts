@@ -45,8 +45,9 @@ export async function render(videos: Video[]): Promise<Uint8Array> {
 
 	const inputs = inMemoryVideoPaths.flatMap(videoPath => ['-i', videoPath]);
 	const complexFilter = [];
-	const scale = Array.from(videos.keys()).map(index =>
-		`[${index}:v]scale=500:500:force_original_aspect_ratio=decrease,pad=640:720:-1:-1:color=black,setsar=sar=1,drawtext=text='%{pts\\:hms}': x=(w-tw)/2: y=h-(2*lh): fontsize=36: fontcolor=white: fontfile=OpenSans.ttf${
+	// TODO: drawtext twice for multiline
+	const scale = videos.map((video, index) =>
+		`[${index}:v]scale=500:500:force_original_aspect_ratio=decrease,pad=640:720:-1:-1:color=black,setsar=sar=1,drawtext=text='%{pts\\:hms}\n${video.title}': x=(w-tw)/2: y=h-(2*lh): fontsize=24: fontcolor=white: fontfile=OpenSans.ttf${
 			videos.length > 1 ? `[${index}:v:scaled]` : '[out]'
 		}`
 	).join(';');

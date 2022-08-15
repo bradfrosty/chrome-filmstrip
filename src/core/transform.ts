@@ -1,3 +1,5 @@
+import { URL } from 'node:url';
+
 export function transformToVideos({ profiles }: ResolvedOptions): Video[] {
 	return profiles.map(profile => {
 		let totalMs = 0;
@@ -16,7 +18,8 @@ export function transformToVideos({ profiles }: ResolvedOptions): Video[] {
 		});
 
 		const navigationEvent = profile.find(event => event.name === 'navigationStart');
-		const title = navigationEvent.args.data.documentLoaderURL;
+		const url = new URL(navigationEvent.args.data.documentLoaderURL);
+		const title = url.hostname + url.pathname;
 		return { title, frames };
 	});
 }
