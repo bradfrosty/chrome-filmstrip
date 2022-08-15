@@ -11,9 +11,16 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "format": "dprint fmt",
     "start": "node --experimental-wasm-threads dist/cli.js"
   },
-  "keywords": ["chrome", "performance", "filmstrip", "lab", "communication"],
+  "keywords": [
+    "chrome",
+    "performance",
+    "filmstrip",
+    "lab",
+    "communication"
+  ],
   "author": "Brad Frost <code@bradfrost.me>",
   "license": "MIT",
   "engines": {
@@ -21,6 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^16",
+    "dprint": "^0.30.3",
     "tsup": "^6.2.2",
     "type-fest": "^2.18.0",
     "typescript": "^4.7.4"
