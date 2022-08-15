@@ -1,3 +1,15 @@
+interface Options {
+	input: string[];
+	output: string;
+	debug?: boolean;
+}
+
+interface ResolvedOptions {
+	profiles: Profile[];
+	output: string;
+	debug: boolean;
+}
+
 // Profile event schema
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/edit#heading=h.lc5airzennvk
 type EventType =
@@ -32,8 +44,17 @@ interface ProfileEvent {
 	ts: number;
 }
 
+type Profile = ProfileEvent[];
+
 interface Frame {
 	durationMs: number;
 	totalMs: number;
 	data: Uint8Array;
 }
+
+interface Video {
+	title?: string;
+	frames: Frame[];
+}
+
+type Filmstrip = Video[];

@@ -5,16 +5,8 @@ import yargs from 'yargs';
 import { bin } from '../package.json' assert { type: 'json' };
 import { createFilmstrip } from './index.js';
 
-export interface Options {
-	input: string;
-	output: string;
-	debug?: boolean;
-}
-
-export type ResolvedOptions = Required<Options>;
-
-function resolveOptions(opts: string[]): ResolvedOptions {
-	return yargs(opts)
+async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
+	const argv = yargs(opts)
 		.scriptName(Object.keys(bin)[0])
 		.usage('Usage: $0 [options]')
 		.options({
@@ -42,23 +34,31 @@ function resolveOptions(opts: string[]): ResolvedOptions {
 		.version().alias('version', 'v')
 		.help().alias('help', 'h')
 		.argv;
+
+	const profiles: Profile[] = await Promise.all(argv.input.map(
+		async (inputPath) => JSON.parse(await readFile(inputPath, { encoding: 'utf-8' })),
+	));
+
+	return {
+		profiles,
+		output: argv.output,
+		debug: argv.debug,
+	};
 }
 
 export async function main() {
-	const options = resolveOptions(process.argv.slice(2));
+	const options = await resolveOptions(process.argv.slice(2));
 	if (options.debug) {
-		console.debug(`Resolved Options: ${JSON.stringify(options, null, 2)}`);
+		const { profiles, ...optionsToPrint } = options;
+		console.debug(`Resolved Options: ${JSON.stringify(optionsToPrint, null, 2)}`);
 	}
 
-	const inputRaw = await readFile(options.input[0], { encoding: 'utf-8' });
-	const profile: ProfileEvent[] = JSON.parse(inputRaw);
-	const filmstrip = await createFilmstrip(profile);
+	const filmstrip = await createFilmstrip(options);
 	await writeFile(options.output, filmstrip);
 	process.exit(0);
 }
 
 function isMain(): boolean {
-	console.log(process.argv[1]);
 	return import.meta.url === url.pathToFileURL(process.argv[1]).href;
 }
 
