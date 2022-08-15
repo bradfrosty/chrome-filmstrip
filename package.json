@@ -1,25 +1,33 @@
 {
   "name": "chrome-filmstrip",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Generate a combined filmstrip video from multiple Chrome performance profiles",
   "type": "module",
-  "main": "index.js",
+  "bin": {
+    "chrome-filmstrip": "node --experimental-wasm-threads ./dist/cli.js"
+  },
+  "module": "./dist/index.js",
+  "exports": "./dist/index.js",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --experimental-wasm-threads dist/cli.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["chrome", "performance", "filmstrip", "lab", "communication"],
+  "author": "Brad Frost <code@bradfrost.me>",
   "license": "MIT",
+  "engines": {
+    "node": "^16"
+  },
   "devDependencies": {
-    "@types/node": "^18.7.3",
+    "@types/node": "^16",
     "tsup": "^6.2.2",
     "type-fest": "^2.18.0",
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "canvas": "^2.9.3"
+    "@ffmpeg/core": "^0.11.0",
+    "@ffmpeg/ffmpeg": "^0.11.0",
+    "yargs": "^17.5.1"
   }
 }
