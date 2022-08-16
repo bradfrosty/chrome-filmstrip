@@ -29,6 +29,7 @@
     "yargs": "^17.5.1"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.24.3",
     "@types/node": "^16",
     "dprint": "^0.30.3",
     "tsup": "^6.2.2",
