@@ -49,7 +49,11 @@ async function renderVideos(videos: Video[]): Promise<string[]> {
 			// overlay video title (centered on the top)
 			`drawtext=text='${video.title}':x=(w-tw)/2:y=(1*lh):${DEFAULT_DRAWTEXT_ARGS}`,
 			// overlay frame timestamp (centered on the bottom)
-			`drawtext=text='%{pts\\:hms}':x=(w-tw)/2:y=h-(2.5*lh):${DEFAULT_DRAWTEXT_ARGS}`,
+			`drawtext=text='%{pts\\:hms}':x=(w-tw)/2:y=h-(2*lh):${DEFAULT_DRAWTEXT_ARGS}`,
+			// TODO: render metrics
+			// `drawtext=text='FCP\\: ${video.metrics.fcp.value}ms':x=(w-tw)/2:y=h-(5*lh):enable='gte(t, ${
+			// 	video.metrics.fcp.value / 1000
+			// })':${DEFAULT_DRAWTEXT_ARGS}`,
 		];
 
 		// execute ffmpeg with concat filter to render an individual video

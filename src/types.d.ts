@@ -52,9 +52,29 @@ interface Frame {
 	data: Uint8Array;
 }
 
+interface Metric {
+	ts: number;
+	value: number;
+}
+
+interface LargestContentfulPaint extends Metric {
+	type: string;
+	size: number;
+}
+
+interface LayoutShift extends Metric {
+	cumulative_score: number;
+}
+
 interface Video {
 	title?: string;
 	frames: Frame[];
+	metrics: {
+		fcp: Metric;
+		lcp: LargestContentfulPaint;
+		cls: LayoutShift[];
+		domInteractive: Metric;
+	};
 }
 
 type Filmstrip = Video[];
