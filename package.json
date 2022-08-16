@@ -15,7 +15,7 @@
   "exports": "./dist/index.js",
   "module": "./dist/index.js",
   "bin": {
-    "chrome-filmstrip": "node --experimental-wasm-threads dist/cli.js"
+    "chrome-filmstrip": "bin.js"
   },
   "files": [
     "bin.js",
