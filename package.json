@@ -17,6 +17,9 @@
   "bin": {
     "chrome-filmstrip": "node --experimental-wasm-threads dist/cli.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
