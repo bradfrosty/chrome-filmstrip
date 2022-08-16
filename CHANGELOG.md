@@ -1,5 +1,11 @@
 # chrome-filmstrip
 
+## 0.2.1
+
+### Patch Changes
+
+- Add shim for the binary
+
 ## 0.2.0
 
 ### Minor Changes
