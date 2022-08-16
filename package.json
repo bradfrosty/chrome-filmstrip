@@ -18,6 +18,7 @@
     "chrome-filmstrip": "node --experimental-wasm-threads dist/cli.js"
   },
   "files": [
+    "bin.js",
     "dist"
   ],
   "scripts": {
