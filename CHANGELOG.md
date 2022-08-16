@@ -1,5 +1,11 @@
 # chrome-filmstrip
 
+## 0.2.2
+
+### Patch Changes
+
+- Update the bin path
+
 ## 0.2.1
 
 ### Patch Changes
