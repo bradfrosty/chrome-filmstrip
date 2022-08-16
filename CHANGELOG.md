@@ -1,5 +1,11 @@
 # chrome-filmstrip
 
+## 0.2.0
+
+### Minor Changes
+
+- Specify artifacts
+
 ## 0.1.1
 
 ### Patch Changes
