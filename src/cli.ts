@@ -58,10 +58,4 @@ export async function main() {
 	process.exit(0);
 }
 
-function isMain(): boolean {
-	return import.meta.url === url.pathToFileURL(process.argv[1]).href;
-}
-
-if (isMain()) {
-	main();
-}
+main();
