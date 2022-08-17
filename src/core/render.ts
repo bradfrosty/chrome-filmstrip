@@ -1,5 +1,5 @@
 import { fetchFile } from '@ffmpeg/ffmpeg';
-import { extname, resolve } from 'path';
+import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { ffmpeg } from './ffmpeg.js';
 
@@ -13,7 +13,7 @@ const VIDEO_FONT_COLOR = 'white';
 const VIDEO_FONT_SIZE = 24;
 const DEFAULT_DRAWTEXT_ARGS = `fontsize=${VIDEO_FONT_SIZE}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
 
-async function renderVideos(videos: Video[], format: string): Promise<string[]> {
+async function renderVideos(videos: Video[]): Promise<string[]> {
 	const videoPaths: string[] = [];
 
 	// Process each video in order
@@ -76,32 +76,34 @@ async function renderVideos(videos: Video[], format: string): Promise<string[]> 
 	return videoPaths;
 }
 
-async function renderCollage(videoPaths: string[], format: string): Promise<Uint8Array> {
+async function renderCollage(videoPaths: string[], options: ResolvedOptions): Promise<Uint8Array> {
 	// An array representing the ffmpeg command for rendering the collage video
 	const cmd = [...videoPaths.flatMap(p => ['-i', p])];
 	// If more than one video, run into collage with hstack
 	if (videoPaths.length > 1) {
-		cmd.push(
-			'-filter_complex',
-			`hstack=inputs=${videoPaths.length}`,
-		);
+		cmd.push('-filter_complex', `hstack=inputs=${videoPaths.length}`);
 	}
 
 	// Output file uses format specified by user
-	let outputPath = 'output' + format;
-	if (format === '.gif') {
-		// For gifs, we need to keep as mp4 to adjust dithering in post
-		// (I think) it has to be done in post because we don't have the video yet
-		// There's probably a way to use the existing screenshots, but not sure how
-		outputPath = 'gif-tmp-output.mp4';
-	}
+	// For gifs, we need to keep as mp4 to adjust dithering in post
+	let outputPath = 'output' + options.format === '.git' ? '.mp4' : options.format;
 
 	cmd.push(outputPath);
 	await ffmpeg.run(...cmd);
 
+	if (options.speed !== 1) {
+		await ffmpeg.run(
+			'-i',
+			outputPath,
+			'-vf',
+			`setpts=PTS/${options.speed}`,
+			outputPath = 'output-speed' + options.format === '.gif' ? '.mp4' : options.format,
+		);
+	}
+
 	// Gif post-process quality enhancement
 	// http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
-	if (format === '.gif') {
+	if (options.format === '.gif') {
 		// Generate a color palette of the video, which creates of histogram of colors by frame
 		await ffmpeg.run(
 			'-i',
@@ -121,7 +123,7 @@ async function renderCollage(videoPaths: string[], format: string): Promise<Uint
 			'palette.png',
 			'-lavfi',
 			'fps=30,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse',
-			outputPath = 'output' + format,
+			outputPath = 'output' + options.format,
 		);
 	}
 
@@ -129,8 +131,6 @@ async function renderCollage(videoPaths: string[], format: string): Promise<Uint
 }
 
 export async function render(videos: Video[], options: ResolvedOptions): Promise<Uint8Array> {
-	const format = extname(options.output);
-
 	// Load font
 	ffmpeg.FS(
 		'writeFile',
@@ -139,8 +139,8 @@ export async function render(videos: Video[], options: ResolvedOptions): Promise
 	);
 
 	// Render individual videos from frame data
-	const videoPaths = await renderVideos(videos, format);
+	const videoPaths = await renderVideos(videos);
 
 	// Render individual videos into a collage (or just output to path if only one)
-	return renderCollage(videoPaths, format);
+	return renderCollage(videoPaths, options);
 }

@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import path from 'node:path';
+import { extname, resolve } from 'node:path';
 import yargs from 'yargs';
 import { bin } from '../package.json' assert { type: 'json' };
 import { createFilmstrip } from './index.js';
@@ -11,23 +11,30 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 		.options({
 			'input': {
 				alias: 'i',
-				array: true,
-				coerce: inputs => inputs.map(input => path.resolve(input)),
+				coerce: inputs => inputs.map(input => resolve(input)),
 				demandOption: true,
 				description: 'provide a path to one or more Chrome profile JSON files',
 				normalize: true,
+				type: 'array',
 			},
 			'output': {
 				alias: 'o',
-				coerce: output => path.resolve(output),
+				coerce: output => resolve(output),
 				demandOption: true,
 				description: 'provide a path to output the filmstrip video',
 				normalize: true,
+				type: 'string',
 			},
 			'debug': {
-				boolean: true,
 				default: false,
 				description: 'enable debug logs',
+				type: 'boolean',
+			},
+			'speed': {
+				alias: 's',
+				default: 1,
+				description: 'change the playback speed of the video (ex: -s 0.5 to slow, -s 2 to speed up)',
+				type: 'number',
 			},
 		})
 		.version().alias('version', 'v')
@@ -40,8 +47,10 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 
 	return {
 		profiles,
+		format: extname(argv.output),
 		output: argv.output,
 		debug: argv.debug,
+		speed: argv.speed,
 	};
 }
 

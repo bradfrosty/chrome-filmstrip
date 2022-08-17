@@ -2,12 +2,15 @@ interface Options {
 	input: string[];
 	output: string;
 	debug?: boolean;
+	speed?: number;
 }
 
 interface ResolvedOptions {
 	profiles: Profile[];
 	output: string;
+	format: string;
 	debug: boolean;
+	speed: number;
 }
 
 // Profile event schema
