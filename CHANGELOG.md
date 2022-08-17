@@ -1,5 +1,12 @@
 # chrome-filmstrip
 
+## 0.3.0
+
+### Minor Changes
+
+- Fix CJS dependency resolution when consumed as binary
+  Optimize GIF output quality
+
 ## 0.2.2
 
 ### Patch Changes
