@@ -1,5 +1,13 @@
 # chrome-filmstrip
 
+## 0.4.0
+
+### Minor Changes
+
+- Add --speed option to control video speed
+  Add --size option to change output size
+  Stop bundling dependencies for CLI
+
 ## 0.3.0
 
 ### Minor Changes
