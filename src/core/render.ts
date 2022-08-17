@@ -16,40 +16,41 @@ const DEFAULT_DRAWTEXT_ARGS = `fontsize=${VIDEO_FONT_SIZE}:fontcolor=${VIDEO_FON
 async function renderVideos(videos: Video[], format: string): Promise<string[]> {
 	const videoPaths: string[] = [];
 
-	// process each video in order
+	// Process each video in order
 	for await (const [index, video] of videos.entries()) {
 		const concatFilter = [];
 		for (const frame of video.frames) {
-			// write frame to in-memory file as {frame-timestamp}.png
+			// Write frame to in-memory file as {frame-timestamp}.png
 			const filename = frame.totalMs + '.png';
 			ffmpeg.FS('writeFile', filename, frame.data);
 
-			// append the duration between the current frame and the previous one (if it exists e.g. duration > 0)
+			// Append the duration between the current frame and the previous one (if it exists e.g. duration > 0)
 			if (frame.durationMs > 0) {
 				concatFilter.push(`duration ${frame.durationMs}`);
 			}
 
-			// append the frame image file
+			// Append the frame image file
 			concatFilter.push(`file ${filename}`);
 		}
-		// write the concat filter input file to concat.txt
+		// Write the concat filter input file to concat.txt
 		ffmpeg.FS('writeFile', CONCAT_INPUT_PATH, concatFilter.join('\n'));
 
 		const postprocessFilter = [
-			// set timebase on scale of microseconds
+			'format=yuva420p',
+			// Set timebase on scale of microseconds
 			'settb=1/1000',
-			// do the same for presentation timestamps
+			// Do the same for presentation timestamps
 			'setpts=PTS/1000',
-			// convert variable fr to constant fr which will interpolate new output frames
-			// set the scene level to 0 — this prevents the interpolated frames from looking like an animation, which is inaccurate
+			// Convert variable fr to constant fr which will interpolate new output frames
+			// Set the scene level to 0 — this prevents the interpolated frames from looking like an animation, which is inaccurate
 			`framerate=fps=${VIDEO_FRAME_RATE}:scene=0`,
-			// scale the video while, downscaling the original aspect ratio if needed
+			// Scale the video while, downscaling the original aspect ratio if needed
 			`scale=${VIDEO_SCALE}:force_original_aspect_ratio=decrease`,
-			// apply extra padding for text space, filling empty space with black background
+			// Apply extra padding for text space, filling empty space with black background
 			`pad=${VIDEO_PADDING}:-1:-1:color=${VIDEO_BACKGROUND_COLOR}`,
-			// overlay video title (centered on the top)
+			// Overlay video title (centered on the top)
 			`drawtext=text='${video.title}':x=(w-tw)/2:y=(1*lh):${DEFAULT_DRAWTEXT_ARGS}`,
-			// overlay frame timestamp (centered on the bottom)
+			// Overlay frame timestamp (centered on the bottom)
 			`drawtext=text='%{pts\\:hms}':x=(w-tw)/2:y=h-(2*lh):${DEFAULT_DRAWTEXT_ARGS}`,
 			// TODO: render metrics
 			// `drawtext=text='FCP\\: ${video.metrics.fcp.value}ms':x=(w-tw)/2:y=h-(5*lh):enable='gte(t, ${
@@ -57,15 +58,15 @@ async function renderVideos(videos: Video[], format: string): Promise<string[]> 
 			// })':${DEFAULT_DRAWTEXT_ARGS}`,
 		];
 
-		// execute ffmpeg with concat filter to render an individual video
-		const videoPath = index + format;
+		// Execute ffmpeg with concat filter to render an individual video
+		const videoPath = index + '.mp4';
 		await ffmpeg.run(
-			// render snapshot images into video with concat filter
+			// Render snapshot images into video with concat filter
 			'-f',
 			'concat',
 			'-i',
 			CONCAT_INPUT_PATH,
-			// apply postprocess filtergraph
+			// Apply postprocess filtergraph
 			'-vf',
 			postprocessFilter.join(','),
 			videoPath,
@@ -76,30 +77,70 @@ async function renderVideos(videos: Video[], format: string): Promise<string[]> 
 }
 
 async function renderCollage(videoPaths: string[], format: string): Promise<Uint8Array> {
-	// an array representing the ffmpeg command for rendering the collage video
+	// An array representing the ffmpeg command for rendering the collage video
 	const cmd = [...videoPaths.flatMap(p => ['-i', p])];
-	// if more than one video, run into collage with hstack
+	// If more than one video, run into collage with hstack
 	if (videoPaths.length > 1) {
-		cmd.push('-filter_complex', `hstack=inputs=${videoPaths.length}`);
+		cmd.push(
+			'-filter_complex',
+			`hstack=inputs=${videoPaths.length}`,
+		);
 	}
-	cmd.push('output' + format);
+
+	// Output file uses format specified by user
+	let outputPath = 'output' + format;
+	if (format === '.gif') {
+		// For gifs, we need to keep as mp4 to adjust dithering in post
+		// (I think) it has to be done in post because we don't have the video yet
+		// There's probably a way to use the existing screenshots, but not sure how
+		outputPath = 'gif-tmp-output.mp4';
+	}
+
+	cmd.push(outputPath);
 	await ffmpeg.run(...cmd);
-	return ffmpeg.FS('readFile', 'output' + format);
+
+	// Gif post-process quality enhancement
+	// http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
+	if (format === '.gif') {
+		// Generate a color palette of the video, which creates of histogram of colors by frame
+		await ffmpeg.run(
+			'-i',
+			outputPath,
+			'-vf',
+			'fps=30,scale=-1:-1:flags=lanczos,palettegen',
+			'palette.png',
+		);
+
+		// Re-encode the gif using the palette to generate the final color quantized stream
+		// This will choose an appropriate input color from the palette
+		// This reduces most of the dithering I've seen in my tests
+		await ffmpeg.run(
+			'-i',
+			outputPath,
+			'-i',
+			'palette.png',
+			'-lavfi',
+			'fps=30,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse',
+			outputPath = 'output' + format,
+		);
+	}
+
+	return ffmpeg.FS('readFile', outputPath);
 }
 
 export async function render(videos: Video[], options: ResolvedOptions): Promise<Uint8Array> {
 	const format = extname(options.output);
 
-	// load font
+	// Load font
 	ffmpeg.FS(
 		'writeFile',
 		VIDEO_FONT_FILE,
 		await fetchFile(resolve(fileURLToPath(import.meta.url), `../../static/${VIDEO_FONT_FILE}`)),
 	);
 
-	// render individual videos from frame data
+	// Render individual videos from frame data
 	const videoPaths = await renderVideos(videos, format);
 
-	// render individual videos into a collage (or just output to path if only one)
+	// Render individual videos into a collage (or just output to path if only one)
 	return renderCollage(videoPaths, format);
 }
