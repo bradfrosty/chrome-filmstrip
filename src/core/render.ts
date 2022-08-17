@@ -1,10 +1,9 @@
 import { fetchFile } from '@ffmpeg/ffmpeg';
-import { resolve } from 'path';
+import { extname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { ffmpeg } from './ffmpeg.js';
 
 const CONCAT_INPUT_PATH = 'concat.txt';
-const VIDEO_OUTPUT_PATH = 'output.mp4';
 const VIDEO_FONT_FILE = 'OpenSans.ttf';
 const VIDEO_FRAME_RATE = 60;
 const VIDEO_SCALE = '500:500';
@@ -14,7 +13,7 @@ const VIDEO_FONT_COLOR = 'white';
 const VIDEO_FONT_SIZE = 24;
 const DEFAULT_DRAWTEXT_ARGS = `fontsize=${VIDEO_FONT_SIZE}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
 
-async function renderVideos(videos: Video[]): Promise<string[]> {
+async function renderVideos(videos: Video[], format: string): Promise<string[]> {
 	const videoPaths: string[] = [];
 
 	// process each video in order
@@ -59,7 +58,7 @@ async function renderVideos(videos: Video[]): Promise<string[]> {
 		];
 
 		// execute ffmpeg with concat filter to render an individual video
-		const videoPath = `${index}.mp4`;
+		const videoPath = index + format;
 		await ffmpeg.run(
 			// render snapshot images into video with concat filter
 			'-f',
@@ -76,27 +75,31 @@ async function renderVideos(videos: Video[]): Promise<string[]> {
 	return videoPaths;
 }
 
-async function renderCollage(videoPaths: string[]): Promise<Uint8Array> {
+async function renderCollage(videoPaths: string[], format: string): Promise<Uint8Array> {
 	// an array representing the ffmpeg command for rendering the collage video
 	const cmd = [...videoPaths.flatMap(p => ['-i', p])];
 	// if more than one video, run into collage with hstack
 	if (videoPaths.length > 1) {
 		cmd.push('-filter_complex', `hstack=inputs=${videoPaths.length}`);
 	}
-	cmd.push(VIDEO_OUTPUT_PATH);
+	cmd.push('output' + format);
 	await ffmpeg.run(...cmd);
-	return ffmpeg.FS('readFile', VIDEO_OUTPUT_PATH);
+	return ffmpeg.FS('readFile', 'output' + format);
 }
 
-export async function render(videos: Video[]): Promise<Uint8Array> {
+export async function render(videos: Video[], options: ResolvedOptions): Promise<Uint8Array> {
+	const format = extname(options.output);
+
 	// load font
 	ffmpeg.FS(
 		'writeFile',
 		VIDEO_FONT_FILE,
 		await fetchFile(resolve(fileURLToPath(import.meta.url), `../../static/${VIDEO_FONT_FILE}`)),
 	);
+
 	// render individual videos from frame data
-	const videoPaths = await renderVideos(videos);
+	const videoPaths = await renderVideos(videos, format);
+
 	// render individual videos into a collage (or just output to path if only one)
-	return renderCollage(videoPaths);
+	return renderCollage(videoPaths, format);
 }
