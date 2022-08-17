@@ -1,6 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import url from 'node:url';
 import yargs from 'yargs';
 import { bin } from '../package.json' assert { type: 'json' };
 import { createFilmstrip } from './index.js';

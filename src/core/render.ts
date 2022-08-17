@@ -1,4 +1,6 @@
 import { fetchFile } from '@ffmpeg/ffmpeg';
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
 import { ffmpeg } from './ffmpeg.js';
 
 const CONCAT_INPUT_PATH = 'concat.txt';
@@ -88,7 +90,11 @@ async function renderCollage(videoPaths: string[]): Promise<Uint8Array> {
 
 export async function render(videos: Video[]): Promise<Uint8Array> {
 	// load font
-	ffmpeg.FS('writeFile', VIDEO_FONT_FILE, await fetchFile(`./static/${VIDEO_FONT_FILE}`));
+	ffmpeg.FS(
+		'writeFile',
+		VIDEO_FONT_FILE,
+		await fetchFile(resolve(fileURLToPath(import.meta.url), `../../static/${VIDEO_FONT_FILE}`)),
+	);
 	// render individual videos from frame data
 	const videoPaths = await renderVideos(videos);
 	// render individual videos into a collage (or just output to path if only one)
