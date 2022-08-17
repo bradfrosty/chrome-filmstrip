@@ -3,6 +3,7 @@ interface Options {
 	output: string;
 	debug?: boolean;
 	speed?: number;
+	size?: number;
 }
 
 interface ResolvedOptions {
@@ -11,6 +12,11 @@ interface ResolvedOptions {
 	format: string;
 	debug: boolean;
 	speed: number;
+	size: number;
+	padding: {
+		x: number;
+		y: number;
+	};
 }
 
 // Profile event schema

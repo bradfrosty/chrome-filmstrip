@@ -6,14 +6,12 @@ import { ffmpeg } from './ffmpeg.js';
 const CONCAT_INPUT_PATH = 'concat.txt';
 const VIDEO_FONT_FILE = 'OpenSans.ttf';
 const VIDEO_FRAME_RATE = 60;
-const VIDEO_SCALE = '500:500';
-const VIDEO_PADDING = '640:640';
 const VIDEO_BACKGROUND_COLOR = 'black';
 const VIDEO_FONT_COLOR = 'white';
 const VIDEO_FONT_SIZE = 24;
 const DEFAULT_DRAWTEXT_ARGS = `fontsize=${VIDEO_FONT_SIZE}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
 
-async function renderVideos(videos: Video[]): Promise<string[]> {
+async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<string[]> {
 	const videoPaths: string[] = [];
 
 	// Process each video in order
@@ -45,9 +43,9 @@ async function renderVideos(videos: Video[]): Promise<string[]> {
 			// Set the scene level to 0 — this prevents the interpolated frames from looking like an animation, which is inaccurate
 			`framerate=fps=${VIDEO_FRAME_RATE}:scene=0`,
 			// Scale the video while, downscaling the original aspect ratio if needed
-			`scale=${VIDEO_SCALE}:force_original_aspect_ratio=decrease`,
+			`scale=${`${options.size}:${options.size}`}:force_original_aspect_ratio=decrease`,
 			// Apply extra padding for text space, filling empty space with black background
-			`pad=${VIDEO_PADDING}:-1:-1:color=${VIDEO_BACKGROUND_COLOR}`,
+			`pad=${`${options.padding.x}:${options.padding.y}`}:-1:-1:color=${VIDEO_BACKGROUND_COLOR}`,
 			// Overlay video title (centered on the top)
 			`drawtext=text='${video.title}':x=(w-tw)/2:y=(1*lh):${DEFAULT_DRAWTEXT_ARGS}`,
 			// Overlay frame timestamp (centered on the bottom)
@@ -86,8 +84,7 @@ async function renderCollage(videoPaths: string[], options: ResolvedOptions): Pr
 
 	// Output file uses format specified by user
 	// For gifs, we need to keep as mp4 to adjust dithering in post
-	let outputPath = 'output' + options.format === '.git' ? '.mp4' : options.format;
-
+	let outputPath = 'output.mp4';
 	cmd.push(outputPath);
 	await ffmpeg.run(...cmd);
 
@@ -97,7 +94,7 @@ async function renderCollage(videoPaths: string[], options: ResolvedOptions): Pr
 			outputPath,
 			'-vf',
 			`setpts=PTS/${options.speed}`,
-			outputPath = 'output-speed' + options.format === '.gif' ? '.mp4' : options.format,
+			outputPath = 'output-new-speed.mp4',
 		);
 	}
 
@@ -123,8 +120,10 @@ async function renderCollage(videoPaths: string[], options: ResolvedOptions): Pr
 			'palette.png',
 			'-lavfi',
 			'fps=30,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse',
-			outputPath = 'output' + options.format,
+			outputPath = 'output-final' + options.format,
 		);
+	} else {
+		await ffmpeg.run('-i', outputPath, outputPath = 'output-final' + options.format);
 	}
 
 	return ffmpeg.FS('readFile', outputPath);
@@ -139,7 +138,7 @@ export async function render(videos: Video[], options: ResolvedOptions): Promise
 	);
 
 	// Render individual videos from frame data
-	const videoPaths = await renderVideos(videos);
+	const videoPaths = await renderVideos(videos, options);
 
 	// Render individual videos into a collage (or just output to path if only one)
 	return renderCollage(videoPaths, options);

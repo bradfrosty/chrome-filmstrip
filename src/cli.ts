@@ -31,9 +31,15 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 				type: 'boolean',
 			},
 			'speed': {
-				alias: 's',
+				alias: 'r',
 				default: 1,
-				description: 'change the playback speed of the video (ex: -s 0.5 to slow, -s 2 to speed up)',
+				description: 'change the playback speed of the video (ex: -r 0.5 to slow, -r 2 to speed up)',
+				type: 'number',
+			},
+			'size': {
+				alias: 's',
+				default: 500,
+				description: 'specify the output size of the video in pixels (ex: -s 800)',
 				type: 'number',
 			},
 		})
@@ -51,6 +57,11 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 		output: argv.output,
 		debug: argv.debug,
 		speed: argv.speed,
+		size: argv.size,
+		padding: {
+			x: argv.size * 1.2,
+			y: argv.size * 1.2,
+		},
 	};
 }
 
