@@ -13,6 +13,7 @@ interface ResolvedOptions {
 	debug: boolean;
 	speed: number;
 	size: number;
+	fontSize: number;
 	padding: {
 		x: number;
 		y: number;

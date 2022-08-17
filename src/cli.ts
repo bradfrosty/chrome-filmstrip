@@ -51,6 +51,9 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 		async (inputPath) => JSON.parse(await readFile(inputPath, { encoding: 'utf-8' })),
 	));
 
+	// compute scale for font assuming 500 default
+	const scale = argv.size / 500;
+
 	return {
 		profiles,
 		format: extname(argv.output),
@@ -58,6 +61,7 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 		debug: argv.debug,
 		speed: argv.speed,
 		size: argv.size,
+		fontSize: Math.round(24 * scale),
 		padding: {
 			x: argv.size * 1.2,
 			y: argv.size * 1.2,

@@ -8,8 +8,6 @@ const VIDEO_FONT_FILE = 'OpenSans.ttf';
 const VIDEO_FRAME_RATE = 60;
 const VIDEO_BACKGROUND_COLOR = 'black';
 const VIDEO_FONT_COLOR = 'white';
-const VIDEO_FONT_SIZE = 24;
-const DEFAULT_DRAWTEXT_ARGS = `fontsize=${VIDEO_FONT_SIZE}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
 
 async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<string[]> {
 	const videoPaths: string[] = [];
@@ -32,6 +30,9 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 		}
 		// Write the concat filter input file to concat.txt
 		ffmpeg.FS('writeFile', CONCAT_INPUT_PATH, concatFilter.join('\n'));
+
+		const DEFAULT_DRAWTEXT_ARGS =
+			`fontsize=${options.fontSize}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
 
 		const postprocessFilter = [
 			'format=yuva420p',
