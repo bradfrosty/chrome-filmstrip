@@ -39,7 +39,8 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "format": "dprint fmt",
-    "start": "./bin.js"
+    "start": "./bin.js",
+    "prepublish": "pnpm build --minify"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.11.0",
