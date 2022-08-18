@@ -5,6 +5,8 @@ export default defineConfig({
 	format: ['esm'],
 	target: 'node16',
 	clean: true,
+	dts: true,
+	minify: true,
 	sourcemap: true,
 	banner: {
 		// fixes a CJS dependency using dynamic require
