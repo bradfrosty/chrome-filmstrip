@@ -1,6 +1,12 @@
 # chrome-filmstrip
 
-Generate side-by-side filmstrip videos from a Chrome performance profile.
+Generate side-by-side filmstrip videos from Chrome performance profiles.
+
+- Visually compare performance traces as a filmsrip video
+- Show timestamp of trace
+- Output in variety of formats
+- Change playback speed
+- Adjust output video size
 
 See example videos [here](./examples/videos/).
 
