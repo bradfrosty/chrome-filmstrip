@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import yargs from 'yargs';
-import { bin } from '../package.json' assert { type: 'json' };
+import { bin, version } from '../package.json' assert { type: 'json' };
 import { createFilmstrip } from './index.js';
 
 async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
@@ -43,7 +43,7 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 				type: 'number',
 			},
 		})
-		.version().alias('version', 'v')
+		.version(version).alias('version', 'v')
 		.help().alias('help', 'h')
 		.argv;
 
