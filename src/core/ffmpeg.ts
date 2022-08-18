@@ -1,4 +1,12 @@
-import { createFFmpeg } from '@ffmpeg/ffmpeg';
+import { createFFmpeg, FFmpeg } from '@ffmpeg/ffmpeg';
+import { runTask } from './task.js';
 
-export const ffmpeg = createFFmpeg({ log: true });
-await ffmpeg.load();
+let _ffmpeg: FFmpeg;
+
+export const ffmpeg = (): FFmpeg => _ffmpeg;
+export const loadFFmpeg = (options: ResolvedOptions) =>
+	runTask({ name: 'loading ffmpeg', options }, async () => {
+		_ffmpeg = createFFmpeg({ log: false });
+		await _ffmpeg.load();
+		return ffmpeg();
+	});

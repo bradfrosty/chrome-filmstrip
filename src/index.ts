@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { ffmpeg } from './core/ffmpeg.js';
+import { loadFFmpeg } from './core/ffmpeg.js';
 import { render } from './core/render.js';
 import { transformToVideos } from './core/transform.js';
 
@@ -9,6 +9,7 @@ export interface Options {
 	debug?: boolean;
 	speed?: number;
 	size?: number;
+	onProgress?: (event: ProgressUpdate) => void;
 }
 
 async function resolveOptions(opts: Options) {
@@ -24,6 +25,7 @@ async function resolveOptions(opts: Options) {
 		format: opts.output.split('.').pop(),
 		output: opts.output,
 		debug: opts.debug,
+		onProgress: opts.onProgress ?? (() => undefined),
 		speed: opts.speed,
 		size: opts.size,
 		fontSize: Math.round(24 * scale),
@@ -40,6 +42,8 @@ export async function createFilmstrip(opts: Options) {
 		const { profiles, ...optionsToPrint } = options;
 		console.debug(`Resolved Options: ${JSON.stringify(optionsToPrint, null, 2)}`);
 	}
+
+	const ffmpeg = await loadFFmpeg(options);
 
 	ffmpeg.setLogging(options.debug);
 	const videos = transformToVideos(options);

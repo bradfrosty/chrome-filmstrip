@@ -3,6 +3,7 @@ interface ResolvedOptions {
 	output: string;
 	format: string;
 	debug: boolean;
+	onProgress: (event: ProgressUpdate) => void;
 	speed: number;
 	size: number;
 	fontSize: number;
@@ -85,3 +86,9 @@ interface Video {
 }
 
 type Filmstrip = Video[];
+
+interface ProgressUpdate {
+	event: 'start' | 'end' | 'update';
+	task: string;
+	progress: number;
+}
