@@ -1,11 +1,3 @@
-interface Options {
-	input: string[];
-	output: string;
-	debug?: boolean;
-	speed?: number;
-	size?: number;
-}
-
 interface ResolvedOptions {
 	profiles: Profile[];
 	output: string;

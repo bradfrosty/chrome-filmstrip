@@ -2,10 +2,10 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import yargs from 'yargs';
 import { bin, version } from '../package.json' assert { type: 'json' };
-import { createFilmstrip } from './index.js';
+import { createFilmstrip, type Options } from './index.js';
 
-async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
-	const argv = yargs(opts)
+function parseOptions(opts: string[]): Promise<Options> {
+	return yargs(opts)
 		.scriptName(Object.keys(bin)[0])
 		.usage('Usage: $0 [options]')
 		.options({
@@ -46,36 +46,10 @@ async function resolveOptions(opts: string[]): Promise<ResolvedOptions> {
 		.version(version).alias('version', 'v')
 		.help().alias('help', 'h')
 		.argv;
-
-	const profiles: Profile[] = await Promise.all(argv.input.map(
-		async (inputPath) => JSON.parse(await readFile(inputPath, { encoding: 'utf-8' })),
-	));
-
-	// compute scale for font assuming 500 default
-	const scale = argv.size / 500;
-
-	return {
-		profiles,
-		format: extname(argv.output),
-		output: argv.output,
-		debug: argv.debug,
-		speed: argv.speed,
-		size: argv.size,
-		fontSize: Math.round(24 * scale),
-		padding: {
-			x: argv.size * 1.2,
-			y: argv.size * 1.2,
-		},
-	};
 }
 
 export async function main() {
-	const options = await resolveOptions(process.argv.slice(2));
-	if (options.debug) {
-		const { profiles, ...optionsToPrint } = options;
-		console.debug(`Resolved Options: ${JSON.stringify(optionsToPrint, null, 2)}`);
-	}
-
+	const options = await parseOptions(process.argv.slice(2));
 	const filmstrip = await createFilmstrip(options);
 	await writeFile(options.output, filmstrip);
 	process.exit(0);
