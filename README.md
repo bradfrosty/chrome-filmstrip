@@ -8,7 +8,7 @@ Generate side-by-side filmstrip videos from Chrome performance profiles.
 - Change playback speed
 - Adjust output video size
 
-See example videos [here](./examples/videos/).
+See example videos [here](https://github.com/bradfrosty/chrome-filmstrip/tree/main/examples/videos).
 
 ## Install
 
