@@ -1,5 +1,16 @@
 # chrome-filmstrip
 
+## 0.4.1
+
+### Patch Changes
+
+- Fix version output in CLI
+  Generate types and minify output
+  Add more usage examples
+  Support Performance Insights panel profile JSON
+  Update example profiles and videos
+  Add CLI spinner
+
 ## 0.4.0
 
 ### Minor Changes
