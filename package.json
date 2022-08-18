@@ -6,14 +6,27 @@
     "chrome",
     "performance",
     "filmstrip",
+    "ffmpeg",
     "lab",
     "communication"
   ],
   "license": "MIT",
   "author": "Brad Frost <code@bradfrost.me>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bradfrosty/chrome-filmstrip.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bradfrosty/chrome-filmstrip/issues"
+  },
+  "homepage": "https://github.com/bradfrosty/chrome-filmstrip/tree/main/#readme",
   "type": "module",
-  "exports": "./dist/index.js",
   "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "default": "./dist/index.js"
+  },
   "bin": {
     "chrome-filmstrip": "bin.js"
   },
@@ -26,7 +39,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "format": "dprint fmt",
-    "start": "node --experimental-wasm-threads dist/cli.js"
+    "start": "./bin.js"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.11.0",
