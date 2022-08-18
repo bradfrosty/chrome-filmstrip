@@ -2,8 +2,9 @@ import { URL } from 'node:url';
 
 export function transformToVideos({ profiles }: ResolvedOptions): Video[] {
 	return profiles.map(profile => {
+		const traceEvents = profile.traceEvents ?? profile;
 		let totalMs = 0;
-		const screenshots = profile.filter(event => event.name === 'Screenshot');
+		const screenshots = traceEvents.filter(event => event.name === 'Screenshot');
 		const frames = screenshots.map((curr, index) => {
 			// read image data into a buffer
 			const data = Buffer.from(curr.args.snapshot, 'base64');
@@ -17,20 +18,20 @@ export function transformToVideos({ profiles }: ResolvedOptions): Video[] {
 			return { data, durationMs, totalMs };
 		});
 
-		const navigationEvent = profile.find(event => event.name === 'navigationStart');
+		const navigationEvent = traceEvents.find(event => event.name === 'navigationStart');
 		const url = new URL(navigationEvent.args.data.documentLoaderURL);
 		const title = url.hostname + url.pathname;
 
-		const fcpEvent = profile.find(event => event.name === 'firstContentfulPaint');
+		const fcpEvent = traceEvents.find(event => event.name === 'firstContentfulPaint');
 		const fcp: Metric = {
 			ts: fcpEvent.ts,
 			value: (fcpEvent.ts - navigationEvent.ts) / 1000,
 		};
 
 		let lcp: LargestContentfulPaint;
-		for (let i = profile.length - 1; i >= 0; --i) {
-			if (profile[i].name === 'largestContentfulPaint::Candidate') {
-				const candidate = profile[i];
+		for (let i = traceEvents.length - 1; i >= 0; --i) {
+			if (traceEvents[i].name === 'largestContentfulPaint::Candidate') {
+				const candidate = traceEvents[i];
 				lcp = {
 					ts: candidate.ts,
 					value: (candidate.ts - navigationEvent.ts) / 1000,
@@ -40,13 +41,13 @@ export function transformToVideos({ profiles }: ResolvedOptions): Video[] {
 			}
 		}
 
-		const cls: LayoutShift[] = profile.filter(event => event.name === 'LayoutShift').map(event => ({
+		const cls: LayoutShift[] = traceEvents.filter(event => event.name === 'LayoutShift').map(event => ({
 			ts: event.ts,
 			value: Number(event.args.data.score),
 			cumulative_score: Number(event.args.data.cumulative_score),
 		}));
 
-		const domInteractive: Metric = profile.filter(event => event.name === 'domInteractive').map(event => ({
+		const domInteractive: Metric = traceEvents.filter(event => event.name === 'domInteractive').map(event => ({
 			ts: event.ts,
 			value: (event.ts - navigationEvent.ts) / 1000,
 		}))[0];

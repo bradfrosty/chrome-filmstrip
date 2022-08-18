@@ -46,7 +46,12 @@ interface ProfileEvent {
 	ts: number;
 }
 
-type Profile = ProfileEvent[];
+type Profile = ProfileEvent[] & {
+	traceEvents: ProfileEvent[];
+	useCase: 'Page load' | string;
+	networkThrottling: 'Fast 3G' | string;
+	cpuThrottling: number;
+};
 
 interface Frame {
 	durationMs: number;

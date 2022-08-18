@@ -101,7 +101,7 @@ async function renderCollage(videoPaths: string[], options: ResolvedOptions): Pr
 
 	// Gif post-process quality enhancement
 	// http://blog.pkh.me/p/21-high-quality-gif-with-ffmpeg.html
-	if (options.format === '.gif') {
+	if (options.format === 'gif') {
 		// Generate a color palette of the video, which creates of histogram of colors by frame
 		await ffmpeg.run(
 			'-i',
@@ -121,10 +121,10 @@ async function renderCollage(videoPaths: string[], options: ResolvedOptions): Pr
 			'palette.png',
 			'-lavfi',
 			'fps=30,scale=-1:-1:flags=lanczos[x];[x][1:v]paletteuse',
-			outputPath = 'output-final' + options.format,
+			outputPath = 'output-final.' + options.format,
 		);
 	} else {
-		await ffmpeg.run('-i', outputPath, outputPath = 'output-final' + options.format);
+		await ffmpeg.run('-i', outputPath, outputPath = 'output-final.' + options.format);
 	}
 
 	return ffmpeg.FS('readFile', outputPath);
