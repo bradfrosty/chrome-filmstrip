@@ -2,6 +2,8 @@
 
 Generate side-by-side filmstrip videos from a Chrome performance profile.
 
+See example videos [here](./examples/videos/).
+
 ## Install
 
 ```sh
