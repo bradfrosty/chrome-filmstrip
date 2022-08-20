@@ -4,7 +4,7 @@ import { render } from './core/render.js';
 import { SUPPORTED_METRICS, transformToVideos } from './core/transform.js';
 
 export interface Options {
-	input: string[];
+	inputs: string[];
 	output: string;
 	debug?: boolean;
 	metrics?: boolean | SupportedMetrics[];
@@ -14,7 +14,7 @@ export interface Options {
 }
 
 async function resolveOptions(opts: Options) {
-	const profiles: Profile[] = await Promise.all(opts.input.map(
+	const profiles: Profile[] = await Promise.all(opts.inputs.map(
 		async (inputPath) => JSON.parse(await readFile(inputPath, { encoding: 'utf-8' })),
 	));
 
