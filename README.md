@@ -22,27 +22,27 @@ pnpm i -g chrome-filmstrip
 
 ```sh
 # one profile
-chrome-filmstrip -i profile.json -o filmstrip.mp4
+chrome-filmstrip profile.json filmstrip.mp4
 
 # many profiles
-chrome-filmstrip -i ./*-profile.json -o compare.mp4
+chrome-filmstrip ./*-profile.json compare.mp4
 
 # output a gif (or other formats)
-chrome-filmstrip -i profile.json -o filmstrip.gif
+chrome-filmstrip profile.json filmstrip.gif
 
 # change the playback speed
-chrome-filmstrip -i fast-profile.json -o slow-filmstrip.webm --speed 0.5
+chrome-filmstrip fast-profile.json slow-filmstrip.webm --speed 0.5
 
 # scale the output size
-chrome-filmstrip -i slow-profile.json -o fast-filmstrip.mkv --speed 2 --scale 1.5
+chrome-filmstrip slow-profile.json fast-filmstrip.mkv --speed 2 --scale 1.5
 
 # control which metrics to display (supported metrics: fp, fcp, lcp, interactive)
-chrome-filmstrip -i profile.json -o filmstrip.gif --metrics all # default
-chrome-filmstrip -i profile.json -o filmstrip.gif --metrics fcp,lcp
-chrome-filmstrip -i profile.json -o filmstrip.gif --metrics none
+chrome-filmstrip profile.json filmstrip.gif --metrics all # default
+chrome-filmstrip profile.json filmstrip.gif --metrics fcp,lcp
+chrome-filmstrip profile.json filmstrip.gif --metrics none
 
 # print ffmpeg debug logs
-chrome-filmstrip -i profile.json -o filmstrip.mov --debug
+chrome-filmstrip profile.json filmstrip.mov --debug
 ```
 
 ### Node
@@ -51,7 +51,7 @@ chrome-filmstrip -i profile.json -o filmstrip.mov --debug
 import { createFilmstrip } from 'chrome-filmstrip';
 
 await createFilmstrip({
-	input: ['profile.json'],
+	inputs: ['profile.json'],
 	output: 'filmstrip.mp4',
 	debug: true,
 	speed: 0.7,
