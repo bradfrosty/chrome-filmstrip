@@ -10,24 +10,17 @@ type CLIOptions = Omit<Options, 'onProgress'>;
 function parseOptions(opts: string[]): Promise<CLIOptions> {
 	const options = yargs(opts)
 		.scriptName(Object.keys(bin)[0])
-		.usage('Usage: $0 [options]')
+		.version(version).alias('version', 'v')
+		.usage('$0 <inputs..> <output> [options]\nGenerate a filmstrip collage from several Chrome profiles')
+		.help().alias('help', 'h')
+		.wrap(120)
+		.command('$0 <inputs-and-output..>', 'default cmd', (yargs) => {
+			yargs.positional('inputs-and-output', {
+				coerce: paths => paths.map(p => resolve(p)),
+			});
+		})
+		.hide('inputs-and-output')
 		.options({
-			'input': {
-				alias: 'i',
-				demandOption: true,
-				description: 'provide a path to one or more Chrome profile JSON files',
-				normalize: true,
-				type: 'array',
-				coerce: inputs => inputs.map(input => resolve(input)),
-			},
-			'output': {
-				alias: 'o',
-				demandOption: true,
-				description: 'provide a path to output the filmstrip video',
-				normalize: true,
-				type: 'string',
-				coerce: output => resolve(output),
-			},
 			'debug': {
 				default: false,
 				description: 'enable debug logs',
@@ -57,10 +50,11 @@ function parseOptions(opts: string[]): Promise<CLIOptions> {
 				},
 			},
 		})
-		.version(version).alias('version', 'v')
-		.help().alias('help', 'h')
 		.argv;
 
+	const output = options.inputsAndOutput.pop();
+	options.inputs = options.inputsAndOutput;
+	options.output = output;
 	return options;
 }
 
