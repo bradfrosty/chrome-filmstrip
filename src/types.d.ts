@@ -1,6 +1,9 @@
+type SupportedMetrics = 'fp' | 'fcp' | 'lcp' | 'interactive';
+
 interface ResolvedOptions {
 	debug: boolean;
 	format: string;
+	metrics: SupportedMetrics[];
 	output: string;
 	profiles: Profile[];
 	speed: number;
@@ -57,6 +60,7 @@ interface Frame {
 
 interface Metric {
 	ts: number;
+	name: string;
 	value: number;
 }
 
@@ -72,12 +76,7 @@ interface LayoutShift extends Metric {
 interface Video {
 	title?: string;
 	frames: Frame[];
-	metrics: {
-		fcp: Metric;
-		lcp: LargestContentfulPaint;
-		cls: LayoutShift[];
-		domInteractive: Metric;
-	};
+	metrics: Metric[];
 }
 
 type Filmstrip = Video[];

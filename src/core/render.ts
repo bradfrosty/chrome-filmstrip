@@ -39,7 +39,7 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 
 			const DEFAULT_DRAWTEXT_ARGS = `fontsize=${fontSize}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
 
-			const numTextElements = 1; // add one for stopwatch
+			const numTextElements = options.metrics.length + 1; // add one for stopwatch
 			const paddingX = fontSize * 2;
 			const paddingTop = fontSize * 2;
 			const paddingBottom = fontSize * (numTextElements + 1);
@@ -63,6 +63,12 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 				`drawtext=text='${video.title}':x=(w-tw)/2:y=(${paddingTop}-lh)/2:${DEFAULT_DRAWTEXT_ARGS}`,
 				// Overlay stopwatch (centered beneath video)
 				`drawtext=text='%{pts\\:hms}':x=(w-tw)/2:y=${size + paddingTop + fontSize / 2}:${DEFAULT_DRAWTEXT_ARGS}`,
+				// Render metrics in order of timestamp
+				...video.metrics.map((metric, index) =>
+					`drawtext=text='${metric.name}\\: ${metric.value.toFixed(1)} ms':x=(w-tw)/2:y=${
+						size + paddingTop + (fontSize / 2) + fontSize * (index + 1)
+					}:enable='gte(t, ${metric.value / 1000})':${DEFAULT_DRAWTEXT_ARGS}`
+				),
 			];
 
 			// Execute ffmpeg with concat filter to render an individual video

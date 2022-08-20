@@ -36,6 +36,11 @@ chrome-filmstrip -i fast-profile.json -o slow-filmstrip.webm --speed 0.5
 # scale the output size
 chrome-filmstrip -i slow-profile.json -o fast-filmstrip.mkv --speed 2 --scale 1.5
 
+# control which metrics to display (supported metrics: fp, fcp, lcp, interactive)
+chrome-filmstrip -i profile.json -o filmstrip.gif --metrics all # default
+chrome-filmstrip -i profile.json -o filmstrip.gif --metrics fcp,lcp
+chrome-filmstrip -i profile.json -o filmstrip.gif --metrics none
+
 # print ffmpeg debug logs
 chrome-filmstrip -i profile.json -o filmstrip.mov --debug
 ```
