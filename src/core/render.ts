@@ -9,9 +9,13 @@ const VIDEO_FONT_FILE = 'OpenSans.ttf';
 const VIDEO_FRAME_RATE = 60;
 const VIDEO_BACKGROUND_COLOR = 'black';
 const VIDEO_FONT_COLOR = 'white';
+const DEFAULT_SIZE = 500;
+const DEFAULT_FONT_SIZE = 24;
 
 async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<string[]> {
 	const videoPaths: string[] = [];
+	const size = options.scale * DEFAULT_SIZE;
+	const fontSize = Math.round(DEFAULT_FONT_SIZE * options.scale);
 
 	// Process each video in order
 	for await (const [index, video] of videos.entries()) {
@@ -33,8 +37,12 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 			// Write the concat filter input file to concat.txt
 			ffmpeg().FS('writeFile', CONCAT_INPUT_PATH, concatFilter.join('\n'));
 
-			const DEFAULT_DRAWTEXT_ARGS =
-				`fontsize=${options.fontSize}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
+			const DEFAULT_DRAWTEXT_ARGS = `fontsize=${fontSize}:fontcolor=${VIDEO_FONT_COLOR}:fontfile=${VIDEO_FONT_FILE}`;
+
+			const numTextElements = 1; // add one for stopwatch
+			const paddingX = fontSize * 2;
+			const paddingTop = fontSize * 2;
+			const paddingBottom = fontSize * (numTextElements + 1);
 
 			const postprocessFilter = [
 				'format=yuva420p',
@@ -46,17 +54,15 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 				// Set the scene level to 0 — this prevents the interpolated frames from looking like an animation, which is inaccurate
 				`framerate=fps=${VIDEO_FRAME_RATE}:scene=0`,
 				// Scale the video while, downscaling the original aspect ratio if needed
-				`scale=${`${options.size}:${options.size}`}:force_original_aspect_ratio=decrease`,
+				`scale=${`${size}:${size}`}:force_original_aspect_ratio=decrease`,
 				// Apply extra padding for text space, filling empty space with black background
-				`pad=${`${options.padding.x}:${options.padding.y}`}:-1:-1:color=${VIDEO_BACKGROUND_COLOR}`,
-				// Overlay video title (centered on the top)
-				`drawtext=text='${video.title}':x=(w-tw)/2:y=(1*lh):${DEFAULT_DRAWTEXT_ARGS}`,
-				// Overlay frame timestamp (centered on the bottom)
-				`drawtext=text='%{pts\\:hms}':x=(w-tw)/2:y=h-(2*lh):${DEFAULT_DRAWTEXT_ARGS}`,
-				// TODO: render metrics
-				// `drawtext=text='FCP\\: ${video.metrics.fcp.value}ms':x=(w-tw)/2:y=h-(5*lh):enable='gte(t, ${
-				// 	video.metrics.fcp.value / 1000
-				// })':${DEFAULT_DRAWTEXT_ARGS}`,
+				`pad=${`${size + paddingX}:${
+					size + paddingTop + paddingBottom
+				}`}:-1:${paddingTop}:color=${VIDEO_BACKGROUND_COLOR}`,
+				// Overlay video title (centered above video)
+				`drawtext=text='${video.title}':x=(w-tw)/2:y=(${paddingTop}-lh)/2:${DEFAULT_DRAWTEXT_ARGS}`,
+				// Overlay stopwatch (centered beneath video)
+				`drawtext=text='%{pts\\:hms}':x=(w-tw)/2:y=${size + paddingTop + fontSize / 2}:${DEFAULT_DRAWTEXT_ARGS}`,
 			];
 
 			// Execute ffmpeg with concat filter to render an individual video

@@ -8,7 +8,7 @@ export interface Options {
 	output: string;
 	debug?: boolean;
 	speed?: number;
-	size?: number;
+	scale?: number;
 	onProgress?: (event: ProgressUpdate) => void;
 }
 
@@ -27,12 +27,7 @@ async function resolveOptions(opts: Options) {
 		debug: opts.debug,
 		onProgress: opts.onProgress ?? (() => undefined),
 		speed: opts.speed,
-		size: opts.size,
-		fontSize: Math.round(24 * scale),
-		padding: {
-			x: opts.size * 1.2,
-			y: opts.size * 1.2,
-		},
+		scale: opts.scale,
 	};
 }
 

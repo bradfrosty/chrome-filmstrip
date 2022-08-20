@@ -39,10 +39,10 @@ function parseOptions(opts: string[]): Promise<CLIOptions> {
 				description: 'change the playback speed of the video (ex: -r 0.5 to slow, -r 2 to speed up)',
 				type: 'number',
 			},
-			'size': {
+			'scale': {
 				alias: 's',
-				default: 500,
-				description: 'specify the output size of the video in pixels (ex: -s 800)',
+				default: 1,
+				description: 'specify a ratio to scale the output size of the video (ex: -s 1.2)',
 				type: 'number',
 			},
 		})

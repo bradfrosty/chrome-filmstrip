@@ -1,16 +1,11 @@
 interface ResolvedOptions {
-	profiles: Profile[];
-	output: string;
-	format: string;
 	debug: boolean;
-	onProgress: (event: ProgressUpdate) => void;
+	format: string;
+	output: string;
+	profiles: Profile[];
 	speed: number;
-	size: number;
-	fontSize: number;
-	padding: {
-		x: number;
-		y: number;
-	};
+	scale: number;
+	onProgress: (event: ProgressUpdate) => void;
 }
 
 // Profile event schema
