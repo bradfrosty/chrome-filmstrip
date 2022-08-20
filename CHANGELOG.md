@@ -1,5 +1,13 @@
 # chrome-filmstrip
 
+## 0.5.0
+
+### Minor Changes
+
+- 6224f35: Replace --size with --scale option
+  Add support for displaying metrics in the filmstrip video
+- 8cde7df: Use positional args instead of options for inputs/output
+
 ## 0.4.1
 
 ### Patch Changes
