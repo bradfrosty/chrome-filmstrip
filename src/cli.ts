@@ -8,25 +8,25 @@ import { createFilmstrip, type Options } from './index.js';
 type CLIOptions = Omit<Options, 'onProgress'>;
 
 function parseOptions(opts: string[]): Promise<CLIOptions> {
-	return yargs(opts)
+	const options = yargs(opts)
 		.scriptName(Object.keys(bin)[0])
 		.usage('Usage: $0 [options]')
 		.options({
 			'input': {
 				alias: 'i',
-				coerce: inputs => inputs.map(input => resolve(input)),
 				demandOption: true,
 				description: 'provide a path to one or more Chrome profile JSON files',
 				normalize: true,
 				type: 'array',
+				coerce: inputs => inputs.map(input => resolve(input)),
 			},
 			'output': {
 				alias: 'o',
-				coerce: output => resolve(output),
 				demandOption: true,
 				description: 'provide a path to output the filmstrip video',
 				normalize: true,
 				type: 'string',
+				coerce: output => resolve(output),
 			},
 			'debug': {
 				default: false,
@@ -39,16 +39,29 @@ function parseOptions(opts: string[]): Promise<CLIOptions> {
 				description: 'change the playback speed of the video (ex: -r 0.5 to slow, -r 2 to speed up)',
 				type: 'number',
 			},
-			'size': {
+			'scale': {
 				alias: 's',
-				default: 500,
-				description: 'specify the output size of the video in pixels (ex: -s 800)',
+				default: 1,
+				description: 'specify a ratio to scale the output size of the video (ex: -s 1.2)',
 				type: 'number',
+			},
+			'metrics': {
+				alias: 'm',
+				default: 'all',
+				description: 'control which metrics to display in the video (ex: -m, -m fcp,lcp -m none)',
+				type: 'string',
+				coerce: metrics => {
+					if (!metrics || metrics === 'all') return true;
+					else if (metrics === 'none') return false;
+					else return metrics.split(',');
+				},
 			},
 		})
 		.version(version).alias('version', 'v')
 		.help().alias('help', 'h')
 		.argv;
+
+	return options;
 }
 
 export async function main() {

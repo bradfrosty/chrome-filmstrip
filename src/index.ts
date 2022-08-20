@@ -1,14 +1,15 @@
 import { readFile } from 'fs/promises';
 import { loadFFmpeg } from './core/ffmpeg.js';
 import { render } from './core/render.js';
-import { transformToVideos } from './core/transform.js';
+import { SUPPORTED_METRICS, transformToVideos } from './core/transform.js';
 
 export interface Options {
 	input: string[];
 	output: string;
 	debug?: boolean;
+	metrics?: boolean | SupportedMetrics[];
 	speed?: number;
-	size?: number;
+	scale?: number;
 	onProgress?: (event: ProgressUpdate) => void;
 }
 
@@ -17,22 +18,24 @@ async function resolveOptions(opts: Options) {
 		async (inputPath) => JSON.parse(await readFile(inputPath, { encoding: 'utf-8' })),
 	));
 
-	// compute scale for font assuming 500 default
-	const scale = opts.size / 500;
+	let resolvedMetrics: SupportedMetrics[];
+	if (opts.metrics === true) {
+		resolvedMetrics = SUPPORTED_METRICS;
+	} else if (opts.metrics === false) {
+		resolvedMetrics = [];
+	} else {
+		resolvedMetrics = opts.metrics.filter(metric => SUPPORTED_METRICS.includes(metric));
+	}
 
 	return {
 		profiles,
+		metrics: resolvedMetrics,
 		format: opts.output.split('.').pop(),
 		output: opts.output,
 		debug: opts.debug,
 		onProgress: opts.onProgress ?? (() => undefined),
 		speed: opts.speed,
-		size: opts.size,
-		fontSize: Math.round(24 * scale),
-		padding: {
-			x: opts.size * 1.2,
-			y: opts.size * 1.2,
-		},
+		scale: opts.scale,
 	};
 }
 
