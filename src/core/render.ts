@@ -53,12 +53,10 @@ async function renderFilmstrips(filmstrips: FilmstripData[], options: ResolvedOp
 				// Convert variable fr to constant fr which will interpolate new output frames
 				// Set the scene level to 0 — this prevents the interpolated frames from looking like an animation, which is inaccurate
 				`framerate=fps=${VIDEO_FRAME_RATE}:scene=0`,
-				// Scale the video while, downscaling the original aspect ratio if needed
-				`scale=${`${size}:${size}`}:force_original_aspect_ratio=decrease`,
+				// Scale the video to defined height while maintaining aspect ratio
+				`scale=${`-1:${size}`}`,
 				// Apply extra padding for text space, filling empty space with black background
-				`pad=${`${size + paddingX}:${
-					size + paddingTop + paddingBottom
-				}`}:-1:${paddingTop}:color=${VIDEO_BACKGROUND_COLOR}`,
+				`pad=${`iw+${paddingX}:ih+${paddingTop + paddingBottom}`}:-1:${paddingTop}:color=${VIDEO_BACKGROUND_COLOR}`,
 				// Overlay video title (centered above video)
 				`drawtext=text='${filmstrip.title}':x=(w-tw)/2:y=(${paddingTop}-lh)/2:${DEFAULT_DRAWTEXT_ARGS}`,
 				// Overlay stopwatch (centered beneath video)
