@@ -10,7 +10,7 @@ Generate side-by-side filmstrip collages from Chrome performance profiles.
 - Adjust output video size
 - Format filmstrip titles
 
-![Example collage](./examples/videos/collage-double-speed.gif)
+![Example collage](./examples/videos/collage-simple.gif)
 
 See more example videos [here](https://github.com/bradfrosty/chrome-filmstrip/tree/main/examples/videos).
 
