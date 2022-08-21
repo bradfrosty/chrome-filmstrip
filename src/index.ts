@@ -13,6 +13,13 @@ export interface Options {
 	onProgress?: (event: ProgressUpdate) => void;
 }
 
+export const DEFAULTS = {
+	debug: false,
+	speed: 1,
+	scale: 1,
+	title: 'Profile {index}: {url.hostname}{url.pathname}',
+	onProgress: () => undefined,
+};
 async function resolveOptions(opts: Options) {
 	const profiles: Profile[] = await Promise.all(opts.inputs.map(
 		async (inputPath) => JSON.parse(await readFile(inputPath, { encoding: 'utf-8' })),
@@ -32,10 +39,10 @@ async function resolveOptions(opts: Options) {
 		metrics: resolvedMetrics,
 		format: opts.output.split('.').pop(),
 		output: opts.output,
-		debug: opts.debug ?? false,
-		onProgress: opts.onProgress ?? (() => undefined),
-		speed: opts.speed ?? 1,
-		scale: opts.scale ?? 1,
+		debug: opts.debug ?? DEFAULTS.debug,
+		onProgress: opts.onProgress ?? DEFAULTS.onProgress,
+		speed: opts.speed ?? DEFAULTS.speed,
+		scale: opts.scale ?? DEFAULTS.scale,
 	};
 }
 
