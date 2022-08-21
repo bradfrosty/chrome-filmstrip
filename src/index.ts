@@ -32,10 +32,10 @@ async function resolveOptions(opts: Options) {
 		metrics: resolvedMetrics,
 		format: opts.output.split('.').pop(),
 		output: opts.output,
-		debug: opts.debug,
+		debug: opts.debug ?? false,
 		onProgress: opts.onProgress ?? (() => undefined),
-		speed: opts.speed,
-		scale: opts.scale,
+		speed: opts.speed ?? 1,
+		scale: opts.scale ?? 1,
 	};
 }
 
@@ -47,7 +47,6 @@ export async function createFilmstrip(opts: Options) {
 	}
 
 	const ffmpeg = await loadFFmpeg(options);
-
 	ffmpeg.setLogging(options.debug);
 	const videos = transformToVideos(options);
 	return render(videos, options);
