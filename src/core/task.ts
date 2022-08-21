@@ -1,37 +1,32 @@
-import type { AsyncReturnType, Promisable } from 'type-fest';
-import { ffmpeg } from './ffmpeg.js';
+import ora from 'ora';
 
 interface TaskOptions {
 	name: string;
 	options: ResolvedOptions;
 }
 
+const capitalize = (val: string) => val.charAt(0).toUpperCase() + val.substring(1);
+
+const spinner = ora({
+	color: 'cyan',
+	spinner: 'dots',
+});
+
 export async function runTask<R>(
 	{ name, options }: TaskOptions,
 	cb: () => R,
 ): Promise<Awaited<R>> {
+	spinner.start(capitalize(name));
 	options.onProgress({
 		task: name,
 		event: 'start',
 		progress: 0,
 	});
 
-	// this assumes ffmpeg tasks are serial
-	ffmpeg()?.setProgress(({ ratio }) => {
-		if (Number.isNaN(ratio)) {
-			return;
-		}
-
-		options.onProgress({
-			task: name,
-			event: 'update',
-			progress: Math.round(ratio * 100),
-		});
-	});
-
 	try {
 		return await cb();
 	} finally {
+		spinner.succeed(`Finished ${name}`);
 		options.onProgress({
 			task: name,
 			event: 'end',

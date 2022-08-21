@@ -1,6 +1,5 @@
 import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import ora from 'ora';
 import yargs from 'yargs';
 import { bin, version } from '../package.json' assert { type: 'json' };
 import { createFilmstrip, type Options } from './index.js';
@@ -60,40 +59,9 @@ function parseOptions(opts: string[]): Promise<CLIOptions> {
 
 export async function main() {
 	const options = await parseOptions(process.argv.slice(2));
-	const spinner = ora({
-		text: `Initializing ffmpeg`,
-		color: 'cyan',
-		spinner: 'dots',
-	});
-
-	const filmstrip = await createFilmstrip({
-		...options,
-		onProgress: ({ task, event, progress }) => {
-			const inProgressMessage = task.charAt(0).toUpperCase() + task.substring(1);
-			switch (event) {
-				case 'start': {
-					spinner.start(inProgressMessage);
-					break;
-				}
-				case 'update': {
-					if (progress > 0 && progress < 1) {
-						spinner.text = `${inProgressMessage} (${progress}%)`;
-					}
-					break;
-				}
-				case 'end': {
-					spinner.succeed(`Finished ${task}`);
-					break;
-				}
-				default: {
-					console.error(`Unknown progress update event "${event}"`);
-					break;
-				}
-			}
-		},
-	});
+	const filmstrip = await createFilmstrip(options);
 	await writeFile(options.output, filmstrip);
-	spinner.text += ` ${options.output}`;
+	console.log(`Filmstrip written to ${options.output}!`);
 	process.exit(0);
 }
 

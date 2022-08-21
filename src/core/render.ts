@@ -15,7 +15,7 @@ const DEFAULT_FONT_SIZE = 24;
 async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<string[]> {
 	const videoPaths: string[] = [];
 	const size = options.scale * DEFAULT_SIZE;
-	const fontSize = Math.round(DEFAULT_FONT_SIZE * options.scale);
+	const fontSize = Math.round(options.scale * DEFAULT_FONT_SIZE);
 
 	// Process each video in order
 	for await (const [index, video] of videos.entries()) {
@@ -96,9 +96,9 @@ const renderCollage = (videoPaths: string[], options: ResolvedOptions): Promise<
 		name: 'rendering collage',
 		options,
 	}, async () => {
-		// An array representing the ffmpeg command for rendering the collage video
 		const cmd = [...videoPaths.flatMap(p => ['-i', p])];
-		// If more than one video, run into collage with hstack
+
+		// If more than one video, render into collage with hstack
 		if (videoPaths.length > 1) {
 			cmd.push('-filter_complex', `hstack=inputs=${videoPaths.length}`);
 		}
