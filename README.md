@@ -1,8 +1,8 @@
 # chrome-filmstrip
 
-Generate side-by-side filmstrip collages from Chrome performance profiles.
+Generate a filmstrip collage from Chrome performance profiles.
 
-- Visually compare performance traces in a filmstrip collage
+- Visually compare performance traces side by side 
 - Show stopwatch of trace duration
 - Show computed metrics from profile
 - Output in variety of formats
@@ -69,13 +69,13 @@ await createFilmstrip({
 
 ## Title Formatting
 
-Filmstrip titles can be formatted by providing a strip with parameters wrapped in curly braces.
+Filmstrip titles can be formatted by providing a format string with parameters wrapped in curly braces.
 
-The available formatting parameters depends on how the profile was created:
+The available formatting parameters depends on how the profile was created.
 
-**Always Available**
+### Always Available
 
-These format parameters are always available regardless of whether the trace was gathered from the Performance or Performance Insights panel.
+These parameters are always available regardless of whether the trace was gathered from the Performance or Performance Insights panel.
 
 URL parameters are determined on a best effort, since the trace is not guaranteed to be a page load.
 
@@ -96,7 +96,7 @@ as it is common to start profiles from `about:blank` to ensure a clean slate for
 - `url.port`: URL.port seen in the profile
 - `url.protocol`: URL.protocol seen in the profile
 
-**Performance Insights Panel Only**
+### Performance Insights Panel Only
 
 If the trace is created from the Performance Insights panel,
 the following additional metadata can be used in the title format.
