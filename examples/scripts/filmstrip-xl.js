@@ -7,8 +7,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const filmstrip = await createFilmstrip({
   inputs: [
-    resolve(__dirname, '../profiles/webpagetest-fast3g.json'),
+    resolve(__dirname, '../profiles/webpagetest-fast3g.performance.json'),
   ],
+  output: resolve(__dirname, '../videos/filmstrip-xl.gif'),
   metrics: false,
   scale: 2,
 });
