@@ -1,5 +1,16 @@
 # chrome-filmstrip
 
+## 0.6.0
+
+### Minor Changes
+
+- 2d01093: Add option to format title
+
+### Patch Changes
+
+- 8ab6434: Fix defaults for options on node
+  Refactor spinner from cli to task manager
+
 ## 0.5.0
 
 ### Minor Changes
