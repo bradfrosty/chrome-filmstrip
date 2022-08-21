@@ -73,13 +73,11 @@ interface LayoutShift extends Metric {
 	cumulative_score: number;
 }
 
-interface Video {
+interface FilmstripData {
 	title?: string;
 	frames: Frame[];
 	metrics: Metric[];
 }
-
-type Filmstrip = Video[];
 
 interface ProgressUpdate {
 	event: 'start' | 'end' | 'update';

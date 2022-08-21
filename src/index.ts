@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
 import { loadFFmpeg } from './core/ffmpeg.js';
+import { parseFilmstripData, SUPPORTED_METRICS } from './core/parse.js';
 import { render } from './core/render.js';
-import { SUPPORTED_METRICS, transformToVideos } from './core/transform.js';
 
 export interface Options {
 	inputs: string[];
@@ -48,6 +48,6 @@ export async function createFilmstrip(opts: Options) {
 
 	const ffmpeg = await loadFFmpeg(options);
 	ffmpeg.setLogging(options.debug);
-	const videos = transformToVideos(options);
-	return render(videos, options);
+	const filmstrips = parseFilmstripData(options);
+	return render(filmstrips, options);
 }

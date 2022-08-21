@@ -12,16 +12,16 @@ const VIDEO_FONT_COLOR = 'white';
 const DEFAULT_SIZE = 500;
 const DEFAULT_FONT_SIZE = 24;
 
-async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<string[]> {
-	const videoPaths: string[] = [];
+async function renderFilmstrips(filmstrips: FilmstripData[], options: ResolvedOptions): Promise<string[]> {
+	const filmstripPaths: string[] = [];
 	const size = options.scale * DEFAULT_SIZE;
 	const fontSize = Math.round(options.scale * DEFAULT_FONT_SIZE);
 
 	// Process each video in order
-	for await (const [index, video] of videos.entries()) {
+	for await (const [index, filmstrip] of filmstrips.entries()) {
 		await runTask({ name: `rendering filmstrip #${index + 1}`, options }, async () => {
 			const concatFilter = [];
-			for (const frame of video.frames) {
+			for (const frame of filmstrip.frames) {
 				// Write frame to in-memory file as {frame-timestamp}.png
 				const filename = frame.totalMs + '.png';
 				ffmpeg().FS('writeFile', filename, frame.data);
@@ -60,11 +60,11 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 					size + paddingTop + paddingBottom
 				}`}:-1:${paddingTop}:color=${VIDEO_BACKGROUND_COLOR}`,
 				// Overlay video title (centered above video)
-				`drawtext=text='${video.title}':x=(w-tw)/2:y=(${paddingTop}-lh)/2:${DEFAULT_DRAWTEXT_ARGS}`,
+				`drawtext=text='${filmstrip.title}':x=(w-tw)/2:y=(${paddingTop}-lh)/2:${DEFAULT_DRAWTEXT_ARGS}`,
 				// Overlay stopwatch (centered beneath video)
 				`drawtext=text='%{pts\\:hms}':x=(w-tw)/2:y=${size + paddingTop + fontSize / 2}:${DEFAULT_DRAWTEXT_ARGS}`,
 				// Render metrics in order of timestamp
-				...video.metrics.map((metric, index) =>
+				...filmstrip.metrics.map((metric, index) =>
 					`drawtext=text='${metric.name}\\: ${metric.value.toFixed(1)} ms':x=(w-tw)/2:y=${
 						size + paddingTop + (fontSize / 2) + fontSize * (index + 1)
 					}:enable='gte(t, ${metric.value / 1000})':${DEFAULT_DRAWTEXT_ARGS}`
@@ -72,7 +72,7 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 			];
 
 			// Execute ffmpeg with concat filter to render an individual video
-			const videoPath = index + '.mp4';
+			const filmstripPath = index + '.mp4';
 			await ffmpeg().run(
 				// Render snapshot images into video with concat filter
 				'-f',
@@ -82,25 +82,25 @@ async function renderVideos(videos: Video[], options: ResolvedOptions): Promise<
 				// Apply postprocess filtergraph
 				'-vf',
 				postprocessFilter.join(','),
-				videoPath,
+				filmstripPath,
 			);
-			videoPaths.push(videoPath);
+			filmstripPaths.push(filmstripPath);
 		});
 	}
 
-	return videoPaths;
+	return filmstripPaths;
 }
 
-const renderCollage = (videoPaths: string[], options: ResolvedOptions): Promise<Uint8Array> =>
+const renderCollage = (filmstripPaths: string[], options: ResolvedOptions): Promise<Uint8Array> =>
 	runTask({
 		name: 'rendering collage',
 		options,
 	}, async () => {
-		const cmd = [...videoPaths.flatMap(p => ['-i', p])];
+		const cmd = [...filmstripPaths.flatMap(p => ['-i', p])];
 
 		// If more than one video, render into collage with hstack
-		if (videoPaths.length > 1) {
-			cmd.push('-filter_complex', `hstack=inputs=${videoPaths.length}`);
+		if (filmstripPaths.length > 1) {
+			cmd.push('-filter_complex', `hstack=inputs=${filmstripPaths.length}`);
 		}
 
 		// Output file uses format specified by user
@@ -151,7 +151,7 @@ const renderCollage = (videoPaths: string[], options: ResolvedOptions): Promise<
 		return ffmpeg().FS('readFile', outputPath);
 	});
 
-export async function render(videos: Video[], options: ResolvedOptions): Promise<Uint8Array> {
+export async function render(filmstrips: FilmstripData[], options: ResolvedOptions): Promise<Uint8Array> {
 	// Load font
 	ffmpeg().FS(
 		'writeFile',
@@ -159,9 +159,9 @@ export async function render(videos: Video[], options: ResolvedOptions): Promise
 		await fetchFile(resolve(fileURLToPath(import.meta.url), `../../static/${VIDEO_FONT_FILE}`)),
 	);
 
-	// Render individual videos from frame data
-	const videoPaths = await renderVideos(videos, options);
+	// Render individual profiles to filmstrip videos from frame data
+	const filmstripPaths = await renderFilmstrips(filmstrips, options);
 
 	// Render individual videos into a collage (or just output to path if only one)
-	return renderCollage(videoPaths, options);
+	return renderCollage(filmstripPaths, options);
 }

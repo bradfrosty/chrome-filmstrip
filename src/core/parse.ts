@@ -2,7 +2,7 @@ import { URL } from 'node:url';
 
 export const SUPPORTED_METRICS: SupportedMetrics[] = ['fp', 'fcp', 'lcp', 'interactive'];
 
-export function transformToVideos({ metrics, profiles }: ResolvedOptions): Video[] {
+export function parseFilmstripData({ metrics, profiles }: ResolvedOptions): FilmstripData[] {
 	return profiles.map(profile => {
 		const traceEvents = profile.traceEvents ?? profile;
 		let totalMs = 0;
