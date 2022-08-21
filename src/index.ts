@@ -1,4 +1,5 @@
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { loadFFmpeg } from './core/ffmpeg.js';
 import { parseFilmstripData, SUPPORTED_METRICS } from './core/parse.js';
 import { render } from './core/render.js';
@@ -10,6 +11,7 @@ export interface Options {
 	metrics?: boolean | SupportedMetrics[];
 	speed?: number;
 	scale?: number;
+	title?: string;
 	onProgress?: (event: ProgressUpdate) => void;
 }
 
@@ -20,9 +22,23 @@ export const DEFAULTS = {
 	title: 'Profile {index}: {url.hostname}{url.pathname}',
 	onProgress: () => undefined,
 };
+
 async function resolveOptions(opts: Options) {
 	const profiles: Profile[] = await Promise.all(opts.inputs.map(
-		async (inputPath) => JSON.parse(await readFile(inputPath, { encoding: 'utf-8' })),
+		async (inputPath, index) => {
+			const profileRaw = JSON.parse(await readFile(inputPath, { encoding: 'utf-8' }));
+			return {
+				index,
+				filename: basename(inputPath),
+				traceEvents: profileRaw.traceEvents ?? profileRaw,
+				metadata: profileRaw.metadata ?? {
+					source: 'DevTools',
+					useCase: '',
+					networkThrottling: '',
+					cpuThrottling: '',
+				},
+			};
+		},
 	));
 
 	let resolvedMetrics: SupportedMetrics[];
@@ -43,6 +59,7 @@ async function resolveOptions(opts: Options) {
 		onProgress: opts.onProgress ?? DEFAULTS.onProgress,
 		speed: opts.speed ?? DEFAULTS.speed,
 		scale: opts.scale ?? DEFAULTS.scale,
+		title: opts.title ?? DEFAULTS.title,
 	};
 }
 

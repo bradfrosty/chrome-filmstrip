@@ -48,6 +48,12 @@ function parseOptions(opts: string[]): Promise<CLIOptions> {
 					else return metrics.split(',');
 				},
 			},
+			title: {
+				alias: 't',
+				default: DEFAULTS.title,
+				description: 'provide a format string for each filmstrip',
+				type: 'string',
+			},
 		})
 		.argv;
 

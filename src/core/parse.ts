@@ -2,9 +2,62 @@ import { URL } from 'node:url';
 
 export const SUPPORTED_METRICS: SupportedMetrics[] = ['fp', 'fcp', 'lcp', 'interactive'];
 
-export function parseFilmstripData({ metrics, profiles }: ResolvedOptions): FilmstripData[] {
+interface TitleFormatParams {
+	index: number;
+	filename: string;
+	source: string;
+	useCase: string;
+	networkThrottling: string;
+	cpuThrottling: number;
+	'url.href': string;
+	'url.origin': string;
+	'url.hostname': string;
+	'url.pathname': string;
+	'url.search': string;
+	'url.hash': string;
+	'url.port': string;
+	'url.protocol': string;
+}
+
+function createTitleFormatParams(profile: Profile): TitleFormatParams {
+	const navigationStartEvent = profile.traceEvents.find(event => event.name === 'navigationStart');
+	const navigationStartUrl = navigationStartEvent.args.data.documentLoaderURL;
+	const tracingStartedEvent = profile.traceEvents.find(event => event.name === 'TracingStartedInBrowser');
+	const tracingStartUrl = tracingStartedEvent.args.data.frames[0].url;
+	// Prefer navigation URL with fallback to URL at time of tracing start
+	// This is because I often start from about:blank when creating page load profiles
+	const url = new URL(navigationStartUrl || tracingStartUrl);
+
+	return {
+		index: profile.index,
+		filename: profile.filename,
+		source: profile.metadata.source,
+		useCase: profile.metadata.useCase,
+		networkThrottling: profile.metadata.networkThrottling,
+		cpuThrottling: profile.metadata.cpuThrottling,
+		'url.href': url.href,
+		'url.origin': url.origin,
+		'url.hostname': url.hostname,
+		'url.pathname': url.pathname,
+		'url.search': url.search,
+		'url.hash': url.hash,
+		'url.port': url.port,
+		'url.protocol': url.protocol,
+	};
+}
+
+function formatTitle(format: string, params: TitleFormatParams): string {
+	let title = format;
+	for (const [name, value] of Object.entries(params)) {
+		title = title.replaceAll(`{${name}}`, String(value));
+	}
+	// escape colons for ffmpeg — these deliminate args on the filters
+	return title.replaceAll(':', '\\:');
+}
+
+export function parseFilmstripData({ title, metrics, profiles }: ResolvedOptions): FilmstripData[] {
 	return profiles.map(profile => {
-		const traceEvents = profile.traceEvents ?? profile;
+		const traceEvents = profile.traceEvents;
 		let totalMs = 0;
 		const screenshots = traceEvents.filter(event => event.name === 'Screenshot');
 		const frames = screenshots.map((curr, index) => {
@@ -21,9 +74,6 @@ export function parseFilmstripData({ metrics, profiles }: ResolvedOptions): Film
 		});
 
 		const navigationEvent = traceEvents.find(event => event.name === 'navigationStart');
-		const url = new URL(navigationEvent.args.data.documentLoaderURL);
-		const title = url.hostname + url.pathname;
-
 		const computedMetrics: Metric[] = [];
 
 		if (metrics.includes('fp')) {
@@ -82,7 +132,7 @@ export function parseFilmstripData({ metrics, profiles }: ResolvedOptions): Film
 		// const metrics: Metric[] = [fp, fcp, lcp, domInteractive].sort((a, b) => a.value - b.value);
 
 		return {
-			title,
+			title: formatTitle(title, createTitleFormatParams(profile)),
 			frames,
 			metrics: computedMetrics.sort((a, b) => a.value - b.value),
 		};

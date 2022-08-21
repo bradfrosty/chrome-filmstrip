@@ -8,6 +8,7 @@ interface ResolvedOptions {
 	profiles: Profile[];
 	speed: number;
 	scale: number;
+	title: string;
 	onProgress: (event: ProgressUpdate) => void;
 }
 
@@ -45,11 +46,16 @@ interface ProfileEvent {
 	ts: number;
 }
 
-type Profile = ProfileEvent[] & {
+type Profile = {
+	index: number;
+	filename: string;
 	traceEvents: ProfileEvent[];
-	useCase: 'Page load' | string;
-	networkThrottling: 'Fast 3G' | string;
-	cpuThrottling: number;
+	metadata: {
+		source: string;
+		useCase: string;
+		networkThrottling: string;
+		cpuThrottling: number;
+	};
 };
 
 interface Frame {
