@@ -2,7 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import yargs from 'yargs';
 import { bin, version } from '../package.json' assert { type: 'json' };
-import { createFilmstrip, type Options } from './index.js';
+import { createFilmstrip, DEFAULTS, type Options } from './index.js';
 
 type CLIOptions = Omit<Options, 'onProgress'>;
 
@@ -20,24 +20,24 @@ function parseOptions(opts: string[]): Promise<CLIOptions> {
 		})
 		.hide('inputs-and-output')
 		.options({
-			'debug': {
-				default: false,
+			debug: {
+				default: DEFAULTS.debug,
 				description: 'enable debug logs',
 				type: 'boolean',
 			},
-			'speed': {
+			speed: {
 				alias: 'r',
-				default: 1,
+				default: DEFAULTS.speed,
 				description: 'change the playback speed of the video (ex: -r 0.5 to slow, -r 2 to speed up)',
 				type: 'number',
 			},
-			'scale': {
+			scale: {
 				alias: 's',
-				default: 1,
+				default: DEFAULTS.scale,
 				description: 'specify a ratio to scale the output size of the video (ex: -s 1.2)',
 				type: 'number',
 			},
-			'metrics': {
+			metrics: {
 				alias: 'm',
 				default: 'all',
 				description: 'control which metrics to display in the video (ex: -m, -m fcp,lcp -m none)',
@@ -47,6 +47,12 @@ function parseOptions(opts: string[]): Promise<CLIOptions> {
 					else if (metrics === 'none') return false;
 					else return metrics.split(',');
 				},
+			},
+			title: {
+				alias: 't',
+				default: DEFAULTS.title,
+				description: 'provide a format string for each filmstrip',
+				type: 'string',
 			},
 		})
 		.argv;
